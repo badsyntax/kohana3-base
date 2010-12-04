@@ -10,7 +10,10 @@ abstract class Controller_Base extends Controller_Template {
 	{
 		// Secure this controller
 		$this->authenticate();
-		
+
+		// Log the database config driver
+		Kohana::$config->attach(new Config_Database);
+
 		// Set the mobile master template
 		Request::$is_mobile AND $this->template .= '_mobile';
 
