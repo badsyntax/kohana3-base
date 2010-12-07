@@ -8,11 +8,11 @@ abstract class Controller_Base extends Controller_Template {
 
 	public function before()
 	{
-		// Secure this controller
-		$this->authenticate();
-
 		// Load the database config driver
 		Kohana::$config->attach(new Config_Database);
+
+		// Secure this controller
+		$this->authenticate();
 
 		// Set the mobile master template
 		Request::$is_mobile AND $this->template .= '_mobile';
