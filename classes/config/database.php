@@ -24,7 +24,7 @@ class Config_Database extends Kohana_Config_Database {
 
 	/**
 	 * Query the configuration table for all values for this group,
-	 * unserialize each of the values, and store the data in cache
+	 * and store the data in cache.
 	 *
 	 * @param   string  group name
 	 * @param   array   configuration array
@@ -44,9 +44,8 @@ class Config_Database extends Kohana_Config_Database {
 					
 			if (count($query) > 0)
 			{
-				// Unserialize the configuration values
 				$config = $query->as_array('config_key', 'config_value');
-					
+				
 				// Save the configuration in cache
 				Cache::instance()->set($cache_key, $config, $this->_cache_lifetime);
 			}				
