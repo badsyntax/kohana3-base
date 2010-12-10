@@ -1,4 +1,4 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 /*
 * User model
 * some concepts and code taken from https://github.com/GeertDD/kohanajobs/blob/master/application/classes/model/user.php
@@ -39,8 +39,6 @@ class Model_Base_User extends Model_Auth_User {
 		$this->save();
 		$this->add('roles', new Model_Role(array('name' =>'login')));
 
-		Message::set(Message::SUCCESS, __('User successfully registered!'));
-
 		Auth::instance()->login($data['username'], $data['password']);
 
 		return $data;
@@ -62,8 +60,6 @@ class Model_Base_User extends Model_Auth_User {
 
 		$this->values($data);
 		$this->save();
-		
-		Message::set(Message::SUCCESS, __('User successfully updated!'));
 
 		return $data;
 	}
