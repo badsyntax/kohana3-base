@@ -2,9 +2,11 @@
 /**
  * An example database configuration reader.
  */
-class Config_Database extends Kohana_Config_Database {
+class Config_Database extends Kohana_Config_Reader {
 
 	protected $_cache_lifetime = NULL;
+	
+	protected $_cache_key = 'database_config';
 
 	protected $_database_instance = 'default';
 
@@ -12,13 +14,23 @@ class Config_Database extends Kohana_Config_Database {
 
 	public function __construct(array $config = NULL)
 	{
-		// Set the cache lifetime
 		if ($this->_cache_lifetime === NULL)
 		{
 			$this->_cache_lifetime = PHP_INT_MAX;
 		}
+		
+		if (isset($config['instance']))
+		{
+			$this->_database_instance = $config['instance'];
+		}
 
-		// Load the empty array
+		if (isset($config['table']))
+		{
+			$this->_database_table = $config['table'];
+		}
+		
+		$this->_cache_key = sha1($this->_cache_key);
+
 		parent::__construct($config);
 	}
 
@@ -32,25 +44,46 @@ class Config_Database extends Kohana_Config_Database {
 	 */
 	public function load($group, array $config = NULL)
 	{
-		$cache_key = sha1("database_config_{$group}");
-	
-		if ($config === NULL AND $group !== 'database' AND $group !== 'cache' AND !$config = Cache::instance()->get($cache_key))
+		if ( $config === NULL AND $group !== 'database' AND $group !== 'cache')
 		{
-			// Load all of the configuration values for this group
-			$query = DB::select('config_key', 'config_value')
-				->from($this->_database_table)
-				->where('group_name', '=', $group)
-				->execute($this->_database_instance);
-					
-			if (count($query) > 0)
+			// Try get the config from cache
+			$cache = Cache::instance()->get($this->_cache_key);	
+	
+			if (!$cache)
 			{
-				$config = $query->as_array('config_key', 'config_value');
+				// Load all of the configuration values
+				$query = DB::select('config_key', 'config_value', 'group_name', 'rules')
+					->from($this->_database_table);
 				
-				// Save the configuration in cache
-				Cache::instance()->set($cache_key, $config, $this->_cache_lifetime);
-			}				
-		} 
+				if (count($query) > 0)
+				{
+					$cache = array();
+					
+					$result = $query->execute();
 		
+					// Build the cache configuration array that contains ALL the config entries
+					foreach($result as $entry)
+					{
+						if (!isset($cache[$entry['group_name']]))
+						{
+							$cache[$entry['group_name']] = array();
+						}
+						
+						$cache[$entry['group_name']][$entry['config_key']] = array(
+							'value' => unserialize($entry['config_value']),
+							'rules' => unserialize($entry['rules'])
+						);
+					}
+					
+					// Save the configuration in cache
+					Cache::instance()->set($this->_cache_key, $cache, $this->_cache_lifetime);
+				}
+			} 
+			
+			// Use the group config if it exists
+			$config = @$cache[$group];
+		} 
+				
 		return parent::load($group, $config);
 	}
 
