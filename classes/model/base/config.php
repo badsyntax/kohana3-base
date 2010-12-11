@@ -2,4 +2,8 @@
 /*
  * Base config model
  */
-class Model_Base_Config extends ORM { } // End Model_Base_Config
+class Model_Base_Config extends ORM {
+
+	public $_table_name = 'config';		
+	
+} // End Model_Base_Config
