@@ -6,11 +6,11 @@ class Config_Database extends Kohana_Config_Reader {
 
 	protected $_cache_lifetime = NULL;
 	
-	protected $_cache_key = 'database_config';
-
 	protected $_database_instance = 'default';
 
 	protected $_database_table = 'config';
+
+	public static $_cache_key = 'database_config';
 
 	public function __construct(array $config = NULL)
 	{
@@ -29,7 +29,7 @@ class Config_Database extends Kohana_Config_Reader {
 			$this->_database_table = $config['table'];
 		}
 		
-		$this->_cache_key = sha1($this->_cache_key);
+		self::$_cache_key = sha1(self::$_cache_key);
 
 		parent::__construct($config);
 	}
@@ -47,7 +47,7 @@ class Config_Database extends Kohana_Config_Reader {
 		if ( $config === NULL AND $group !== 'database' AND $group !== 'cache')
 		{
 			// Try get the config from cache
-			$cache = Cache::instance()->get($this->_cache_key);	
+			$cache = Cache::instance()->get(self::$_cache_key);	
 	
 			if (!$cache)
 			{
@@ -76,7 +76,7 @@ class Config_Database extends Kohana_Config_Reader {
 					}
 					
 					// Save the configuration in cache
-					Cache::instance()->set($this->_cache_key, $cache, $this->_cache_lifetime);
+					Cache::instance()->set(self::$_cache_key, $cache, $this->_cache_lifetime);
 				}
 			} 
 			
