@@ -2,7 +2,7 @@
 /**
  * An example database configuration reader.
  */
-class Config_Database extends Kohana_Config_Reader {
+class Config_Database extends Kohana_Config_Database {
 
 	protected $_cache_lifetime = NULL;
 	
@@ -55,28 +55,25 @@ class Config_Database extends Kohana_Config_Reader {
 		if (!$cache)
 		{
 			// Load all of the configuration values
-			$query = DB::select('config_key', 'config_value', 'group_name', 'rules')
-				->from($this->_database_table);
+			$query = DB::select('config_key', 'config_value', 'group_name')
+				->from($this->_database_table)
+				->execute();
 				
 			if (count($query) > 0)
 			{
 				$cache = array();
 					
 				// Build the cache configuration array that contains ALL the config entries
-				foreach($query->execute() as $entry)
+				foreach($query as $entry)
 				{
 					if (!isset($cache[$entry['group_name']]))
 					{
 						$cache[$entry['group_name']] = array();
 					}
 						
-					$cache[$entry['group_name']][$entry['config_key']] = 
-						array(
-							'value' => unserialize($entry['config_value']),
-							'rules' => unserialize($entry['rules'])
-						);
+					$cache[$entry['group_name']][$entry['config_key']] = unserialize($entry['config_value']);
 				}
-					
+				
 				// Save the configuration in cache
 				Cache::instance()->set(self::$_cache_key, $cache, $this->_cache_lifetime);
 			}
