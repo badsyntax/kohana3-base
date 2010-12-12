@@ -2,7 +2,7 @@
 /**
  * An example database configuration reader.
  */
-class Config_Database extends Kohana_Config_Database {
+class Config_Database extends Kohana_Config_Reader {
 
 	protected $_cache_lifetime = NULL;
 	
