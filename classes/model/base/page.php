@@ -6,8 +6,7 @@ class Model_Base_Page extends ORM {
 	
 	protected $_belongs_to = array(
 		'parent' => array('model' => 'page', 'foreign_key' => 'parent_id'),
-	);
-	
+	);	
 	
 	protected $_has_many = array(
 		'children' => array('model' => 'page', 'foreign_key' => 'parent_id'),
@@ -29,13 +28,18 @@ class Model_Base_Page extends ORM {
 		),
 		'uri' => array(
 			'not_empty'  => NULL,
-			'min_length' => array(5),
+			'min_length' => array(3),
 			'max_length' => array(128),
 			'regex'      => array('/^[-\pL\pN_.]++$/uD'),
 		),
 		'body' => array(
 			'not_empty'  => NULL,
 		),
+	);
+	
+	// Validaiton callbacks
+	protected $_callbacks = array(
+		
 	);
 	
 	public function delete($id = NULL)
@@ -45,7 +49,7 @@ class Model_Base_Page extends ORM {
 			// Use the the primary key value
 			$id = $this->pk();
 		}
-
+		
 		if ( ! empty($id) OR $id === '0')
 		{
 			foreach ($this->children->find_all() as $child)
@@ -59,24 +63,22 @@ class Model_Base_Page extends ORM {
 		return $this;
 	}
 	
-	public function tree_select($indent = 4)
+	public function tree_select($indent = 4, $start_id = 0, $pages = array())
 	{
-		$start_pages = $this->where('parent_id', '=', 0)->find_all();
-			
-		$pages = array();
-		$this->recurse_tree_select($start_pages, $pages, $indent);
+		$start = $this->where('parent_id', '=', $start_id);
+		
+		$this->recurse_tree_select($start->find_all(), $pages, $indent);
 		
 		return $pages;
 	}
 	
-	public function tree_list_html($view_path = NULL)
+	public function tree_list_html($view_path = NULL, $start_id = 0, $list_html = '')
 	{
-		$start_pages = $this->where('parent_id', '=', 0)->find_all();
-			
-		$list = '';
-		$this->recurse_tree_list_html($start_pages, $list, $view_path);
+		$start = $this->where('parent_id', '=', $start_id);
+
+		$this->recurse_tree_list_html($start->find_all(), $list_html, $view_path);
 		
-		return $list;
+		return $list_html;
 	}
 	
 	private function recurse_tree_select($pages, & $array = array(), $indent = 4, & $depth = 0)
@@ -100,10 +102,10 @@ class Model_Base_Page extends ORM {
 	{
 		$depth++;
 		
-		if (count($pages))
-		{
-			$html .= View::factory($view_path.'/list_open');
-		}
+		$has_pages = (count($pages) > 0);
+		
+		$has_pages AND $html .= View::factory($view_path.'/list_open');
+
 		foreach($pages as $page)
 		{
 			$html .= View::factory($view_path.'/item_open')->set('page', $page);
@@ -114,10 +116,8 @@ class Model_Base_Page extends ORM {
 			
 			$html .= View::factory($view_path.'/item_close');
 		}
-		if (count($pages))
-		{
-			$html .= View::factory($view_path.'/list_close');
-		}		
+		
+		$has_pages AND $html .= View::factory($view_path.'/list_close');
 	}	
 	
 } // End Model_Base_Page
