@@ -3,6 +3,8 @@
 abstract class Controller_Base extends Controller_Template {
  
 	public $template = 'page/master_page';
+	
+	public $auto_render = TRUE;
 
 	protected $auth_required = FALSE;
 
@@ -19,26 +21,28 @@ abstract class Controller_Base extends Controller_Template {
 
 		parent::before();
 
-		// Set default template vars
-		$this->template->title =
-		$this->template->content = '';
+		if ($this->auto_render)
+		{
+			$this->template->title =
+			$this->template->content = '';
 
-		// Set the stylesheet and javascript paths
-		$assets = Request::$is_mobile ? 'assets.mobile' : 'assets.default';
+			// Set the stylesheet and javascript paths
+			$assets = Request::$is_mobile ? 'assets.mobile' : 'assets.default';
 
-		$this->template->styles = Kohana::config("{$assets}.style");
-		$this->template->scripts = Kohana::config("{$assets}.script");
+			$this->template->styles = Kohana::config("{$assets}.style");
+			$this->template->scripts = Kohana::config("{$assets}.script");
+		}
+	}
 
+	public function after()
+	{
 		// If the media module is enabled then run the scripts through the compressors
 		if (class_exists('Media')) 
 		{
 			$this->template->styles = Media::instance()->styles( $this->template->styles);
 			$this->template->scripts = Media::instance()->scripts( $this->template->scripts);
 		}
-	}
-
-	public function after()
-	{
+			
 		// jquery-mobile requires the entire template returned, 
 		// for all other ajax requests we'll only return the template content
 		$ajax_response = (Request::$is_ajax AND !Request::$is_mobile);
