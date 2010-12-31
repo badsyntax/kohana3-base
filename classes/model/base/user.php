@@ -5,11 +5,21 @@
 */
 
 class Model_Base_User extends Model_Auth_User {
+	
+	// Relationships
+	protected $_has_many = array(
+		'user_tokens'	=> array('model' => 'user_token'),
+		'assets'		=> array('model' => 'asset'),
+		'activities'	=> array('model' => 'activity'),
+		'roles'			=> array('model' => 'role', 'through' => 'roles_users'),
+		'groups'		=> array('model' => 'group', 'through' => 'groups_users')
+	);
 
 	public function login(array & $array, $redirect = FALSE)
 	{
-
-		if (!isset($array['username'])) $array['username'] = '';
+		// FIXME
+		if (!isset($array['username'])) 
+			$array['username'] = '';
 
 		return parent::login($array, $redirect);
 	}
@@ -23,16 +33,17 @@ class Model_Base_User extends Model_Auth_User {
 			->rules('email', $this->_rules['email'])
 			->rules('password_confirm', $this->_rules['password_confirm']);
  
+		// Add validate callbacks
 		foreach($this->_callbacks['username'] as $callback)
 		{
 			$data->callback('username', array($this, $callback));
-		}
- 
+		} 
 		foreach($this->_callbacks['email'] as $callback)
 		{
 			$data->callback('email', array($this, $callback));
 		}		
  
+		// Check the validation
 		if (!$data->check()) return FALSE;
 
 		$this->values($data);
@@ -79,6 +90,25 @@ class Model_Base_User extends Model_Auth_User {
 			} else {
 				// Remove roles relationship
 				$this->remove('roles', new Model_Role(array('id' => $role->id)));
+			}
+		}
+	}
+	
+	public function update_groups(& $groups)
+	{
+		foreach(ORM::factory('group')->find_all() as $group) {
+
+			if (in_array($group->id, $groups)) {
+
+				try {
+					// Add roles relationship
+					$this->add('groups', new Model_Group(array('id' => $group->id)));
+
+				} catch(Exception $e){}
+
+			} else {
+				// Remove roles relationship
+				$this->remove('groups', new Model_Group(array('id' => $group->id)));
 			}
 		}
 	}
@@ -168,4 +198,4 @@ class Model_Base_User extends Model_Auth_User {
 		return $this->save();
 	}
 	
-} // End Model_User
+} // End Model_Base_User
