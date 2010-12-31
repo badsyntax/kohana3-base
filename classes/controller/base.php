@@ -37,7 +37,7 @@ abstract class Controller_Base extends Controller_Template {
 	public function after()
 	{
 		// If the media module is enabled then run the scripts through the compressors
-		if (class_exists('Media')) 
+		if ($this->auto_render AND class_exists('Media')) 
 		{
 			$this->template->styles = Media::instance()->styles( $this->template->styles);
 			$this->template->scripts = Media::instance()->scripts( $this->template->scripts);
