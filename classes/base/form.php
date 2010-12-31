@@ -39,6 +39,13 @@ abstract class Base_Form extends Kohana_Form {
 		return parent::textarea($name, $body, $attributes, $double_encode);
 	}
 	
+	public static function file($name, array $attributes = NULL, array $errors = NULL)
+ 	{
+		static::attributes($name, $attributes, $errors);
+	
+		return parent::file($name, $attributes);
+	}
+	
 	public static function label($input, $text = NULL, array $attributes = NULL, array $errors = NULL)
 	{
 		// Use the label_error view to append an error message to the label
