@@ -1,3 +1,3 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 
-class Model_User extends Model_Base_User { } // End Model_User
+class Model_User extends Model_Base_User { } 
