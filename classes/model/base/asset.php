@@ -57,39 +57,59 @@ class Model_Base_Asset extends Model_Base {
 		{			
 			Asset::resize($file, $path, $width, $height, $crop);
 		}
-	}	
+	}
+	
+	public function rotate($degrees = 90)
+	{
+		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		
+		if (file_exists($file))
+		{
+			Asset::rotate($file, $degrees);
+		}
+	}
+	
+	public function sharpen($amount = 20)
+	{
+		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		
+		if (file_exists($file))
+		{
+			Asset::rotate($file, $amount);
+		}
+	}
+	
+	public function flip_horizontal()
+	{
+		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		
+		if (file_exists($file))
+		{
+			Asset::flip_horizontal($file);
+		}
+	}
+	public function flip_vertical()
+	{
+		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		
+		if (file_exists($file))
+		{
+			Asset::flip_vertical($file);
+		}
+	}
+	
+	public function url($full = FALSE)
+	{
+		return Asset::url($this, $full);		
+	}
 	
 	public function image_url($width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
 	{
-		if (!$this->loaded()) exit;
-		
-		$pathinfo = pathinfo($this->filename);
-		
-		$filename = $pathinfo['filename'];
-		
-		$path = Kohana::config('admin/asset.upload_path').'/'.$filename.'.'.$this->mimetype->extension;
-		
-		if ($width AND $height AND ($this->mimetype->subtype == 'image' OR ($this->mimetype->subtype == 'application' AND $this->mimetype->type == 'pdf')))
-		{
-			$crop = (string) (int) $crop;
-		
-			$filename = preg_replace('/^'.$this->id.'_/', '', $filename);
-
-			$filename = $this->id."_{$width}_{$height}_{$crop}_{$filename}";
-
-			if ($this->mimetype->subtype === 'application' AND $this->mimetype->type == 'pdf')
-			{
-				$this->mimetype->extension = 'png';
-			}
-			
-			$path = Kohana::config('admin/asset.upload_path').'/resized/'.$filename.'.'.$this->mimetype->extension;
-		}
-			
-		if ($full_path)
-		{
-			$full_path = DOCROOT.$fullpath;
-		}
-				
-		return $path;
+		return Asset::image_url($this, $width, $height, $crop, $full_path);
+	}
+	
+	public function image_path($width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
+	{
+		return Asset::image_path($this, $width, $height, $crop, $full_path);
 	}
 }
