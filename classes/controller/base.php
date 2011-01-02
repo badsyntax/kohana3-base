@@ -28,7 +28,6 @@ abstract class Controller_Base extends Controller_Template {
 
 			// Set the stylesheet and javascript paths
 			$assets = Request::$is_mobile ? 'assets.mobile' : 'assets.default';
-
 			$this->template->styles = Kohana::config("{$assets}.style");
 			$this->template->scripts = Kohana::config("{$assets}.script");
 		}
