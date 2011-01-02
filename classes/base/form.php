@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-abstract class Base_Form extends Kohana_Form {
+class Base_Form extends Kohana_Form {
 
 	private static function attributes($name, & $attributes = NULL, $errors = NULL)
 	{
@@ -8,7 +8,10 @@ abstract class Base_Form extends Kohana_Form {
 		! isset($attributes['id']) AND $attributes['id'] = $name;
 
 		// Set the error classname
-		isset($errors[$name]) AND $attributes['class'] = trim( (string) @$attributes['class'].' error-field');
+		if (isset($errors[$name]))
+		{
+			$attributes['class'] = trim( (string) @$attributes['class'].' error-field');			
+		}
 	}
 
 	public static function input($name, $value = NULL, array $attributes = NULL, array $errors = NULL)
