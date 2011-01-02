@@ -51,7 +51,7 @@ class Model_Base_Asset extends Model_Base {
 	
 	public function resize($path, $width = NULL, $height = NULL, $crop = NULL)
 	{
-		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		$file = $this->path(TRUE);
 		
 		if (file_exists($file))
 		{			
@@ -61,7 +61,7 @@ class Model_Base_Asset extends Model_Base {
 	
 	public function rotate($degrees = 90)
 	{
-		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		$file = $this->path(TRUE);
 		
 		if (file_exists($file))
 		{
@@ -71,7 +71,7 @@ class Model_Base_Asset extends Model_Base {
 	
 	public function sharpen($amount = 20)
 	{
-		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		$file = $this->path(TRUE);
 		
 		if (file_exists($file))
 		{
@@ -81,7 +81,7 @@ class Model_Base_Asset extends Model_Base {
 	
 	public function flip_horizontal()
 	{
-		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		$file = $this->path(TRUE);
 		
 		if (file_exists($file))
 		{
@@ -90,7 +90,7 @@ class Model_Base_Asset extends Model_Base {
 	}
 	public function flip_vertical()
 	{
-		$file = DOCROOT.Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		$file = $this->path(TRUE);
 		
 		if (file_exists($file))
 		{
@@ -103,6 +103,15 @@ class Model_Base_Asset extends Model_Base {
 		return Asset::url($this, $full);		
 	}
 	
+	public function path($full = FALSE)
+	{
+		$path = Kohana::config('admin/asset.upload_path').'/'.$this->filename;
+		
+		return ($full)
+			? DOCROOT.$path
+			: $path;
+	}
+	
 	public function image_url($width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
 	{
 		return Asset::image_url($this, $width, $height, $crop, $full_path);
@@ -111,5 +120,31 @@ class Model_Base_Asset extends Model_Base {
 	public function image_path($width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
 	{
 		return Asset::image_path($this, $width, $height, $crop, $full_path);
+	}
+	
+	public function is_image()
+	{
+		return ($this->mimetype->subtype == 'image');
+	}
+	
+	public function __get($key) {
+		
+		if (($key == 'width' OR $key == 'height') AND $this->is_image())
+		{
+			try
+			{
+				$image_size = getimagesize($this->path(TRUE));
+				
+				if ($image_size)
+				{
+					return ($key == 'width')
+						? $image_size[0]
+						: $image_size[1];
+				}				
+			}
+			catch(Exception $e){}
+		}
+		
+		return parent::__get($key);
 	}
 }
