@@ -7,7 +7,7 @@ class Config_Database extends Kohana_Config_Reader {
 	protected $_cache_lifetime = NULL;
 	
 	protected $_database_instance = 'default';
-
+	
 	protected $_database_table = 'config';
 
 	public static $_cache_key = 'database_config';
