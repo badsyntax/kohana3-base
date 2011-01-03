@@ -52,7 +52,7 @@ class Base_Form extends Kohana_Form {
 	public static function label($input, $text = NULL, array $attributes = NULL, array $errors = NULL)
 	{
 		// Use the label_error view to append an error message to the label
-		isset($errors[$input]) AND $text .= View::factory('admin/messages/label_error')->bind('error', $errors[$input]);
+		isset($errors[$input]) AND $text .= View::factory('messages/label_error')->bind('error', $errors[$input]);
 
 		return parent::label($input, $text, $attributes);
 	}
