@@ -107,9 +107,7 @@ class Model_Base_Asset extends Model_Base {
 	{
 		$path = Kohana::config('admin/asset.upload_path').'/'.$this->filename;
 		
-		return ($full)
-			? DOCROOT.$path
-			: $path;
+		return Asset::path($this, $full);
 	}
 	
 	public function image_url($width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
@@ -126,6 +124,11 @@ class Model_Base_Asset extends Model_Base {
 	{
 		return ($this->mimetype->subtype == 'image');
 	}
+	
+	 public function is_pdf()
+	{
+		return ($this->mimetype->subtype == 'application' AND $this->mimetype->type == 'pdf');
+	}	
 	
 	public function __get($key) {
 		
