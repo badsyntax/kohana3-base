@@ -44,16 +44,16 @@ class Base_Asset {
 
 		$filename = $pathinfo['filename'];
 
+		$crop = (string) (int) $crop;
+
 		$path = Kohana::config('admin/asset.upload_path').'/'.$filename.'.'.$asset->mimetype->extension;
 
 		if ($asset->mimetype->subtype == 'image' AND $width AND $height)
 		{
 			$image = Image::factory($path, static::$driver);
 
-			if ($image->height > $height AND $image->width > $width)
+			if ($image->height > $height OR $image->width > $width)
 			{
-				$crop = (string) (int) $crop;
-
 				$filename = preg_replace('/^'.$asset->id.'_/', '', $filename);
 
 				$filename = $asset->id."_{$width}_{$height}_{$crop}_{$filename}";
@@ -63,13 +63,34 @@ class Base_Asset {
 		}
 		elseif ($asset->mimetype->subtype == 'application' AND $asset->mimetype->type == 'pdf' AND $width AND $height)
 		{
-			$crop = (string) (int) $crop;
-
 			$filename = preg_replace('/^'.$asset->id.'_/', '', $filename);
 
 			$filename = $asset->id."_{$width}_{$height}_{$crop}_{$filename}";
 
 			$path = Kohana::config('admin/asset.upload_path').'/resized/'.$filename.'.png';
+		}
+
+		if (!file_exists($path))
+		{
+			// Find the size in the db
+			$size = ORM::factory('asset_size')
+				->where('asset_id', '=', $asset->id)
+				->where('width', '=', $width)
+				->where('height', '=', $height)
+				->where('crop', '=', $crop)
+				->find();
+			
+			// If no size then create one, this is a security feature 
+			// to disallow building image sizes anonymously
+			if (!$size->loaded())
+			{
+				$size->asset_id = $asset->id;
+				$size->width = $width;
+				$size->height = $height;
+				$size->crop = $crop;
+				$size->filename = basename($path);
+				$size->save();
+			}
 		}
 		
 		return $path;
@@ -89,6 +110,15 @@ class Base_Asset {
 		return ($full_path)
 			? DOCROOT.$path
 			: $path;
+	}	
+
+	public static function path($asset, $full = FALSE, $resized = '')
+	{
+	   $path = Kohana::config('admin/asset.upload_path').'/'.$resized.$asset->filename;
+
+	   return ($full)
+			   ? DOCROOT.$path
+			   : $path;
 	}
 	
 	public function url($asset, $full = FALSE)
