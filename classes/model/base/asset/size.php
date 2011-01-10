@@ -63,6 +63,8 @@ class Model_Base_Asset_size extends Model_Base {
 	{
 		$path = Kohana::config('admin/asset.upload_path').'/resized/'.$this->filename;
 		
-		return Asset::path($this, $full);
+		return ($full)
+			   ? DOCROOT.$path
+			   : $path;
 	}
 }
