@@ -125,11 +125,21 @@ class Model_Base_Asset extends Model_Base {
 		return ($this->mimetype->subtype == 'image');
 	}
 	
-	 public function is_pdf()
+	public function is_pdf()
 	{
 		return ($this->mimetype->subtype == 'application' AND $this->mimetype->type == 'pdf');
 	}	
 	
+	public function is_text_document()
+	{
+		return ($this->mimetype->subtype == 'text');
+	}
+	
+	public function is_archive()
+	{
+		return ($this->mimetype->subtype == 'application' AND ($this->mimetype->type == 'x-tar' OR $this->mimetype->type == 'zip'));
+	}
+		
 	public function __get($key) {
 		
 		if (($key == 'width' OR $key == 'height') AND $this->is_image())
