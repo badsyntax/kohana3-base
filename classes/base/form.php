@@ -49,10 +49,13 @@ class Base_Form extends Kohana_Form {
 		return parent::file($name, $attributes);
 	}
 	
-	public static function label($input, $text = NULL, array $attributes = NULL, array $errors = NULL)
+	public static function label($input, $text = NULL, array $attributes = NULL, array $errors = NULL, $view = 'messages/label_error')
 	{
 		// Use the label_error view to append an error message to the label
-		isset($errors[$input]) AND $text .= View::factory('messages/label_error')->bind('error', $errors[$input]);
+		if (isset($errors[$input]))
+		{
+			$text .= View::factory($view)->bind('error', $errors[$input]);
+		}
 
 		return parent::label($input, $text, $attributes);
 	}
