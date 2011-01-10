@@ -45,9 +45,9 @@ class Base_Asset {
 		$filename = $pathinfo['filename'];
 
 		$crop = (string) (int) $crop;
-
+		
 		$path = Kohana::config('admin/asset.upload_path').'/'.$filename.'.'.$asset->mimetype->extension;
-
+		
 		if ($asset->mimetype->subtype == 'image' AND $width AND $height)
 		{
 			$image = Image::factory($path, static::$driver);
@@ -70,7 +70,7 @@ class Base_Asset {
 			$path = Kohana::config('admin/asset.upload_path').'/resized/'.$filename.'.png';
 		}
 
-		if (!file_exists($path))
+		if (!file_exists($path) AND $width !== NULL AND $height !== NULL)
 		{
 			// Find the size in the db
 			$size = ORM::factory('asset_size')
@@ -98,7 +98,7 @@ class Base_Asset {
 	
 	public static function image_url($asset, $width = NULL, $height = NULL, $crop = NULL, $full_path = FALSE)
 	{
-		$path = self::docpath($asset, $width, $height, $crop);
+		$path = self::docpath($asset, $width, $height, $crop, $full_path);
 			
 		return URL::site($path, $full_path);
 	}
