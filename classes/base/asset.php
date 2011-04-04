@@ -46,11 +46,19 @@ class Base_Asset {
 
 		$crop = (string) (int) $crop;
 		
-		$path = Kohana::config('admin/asset.upload_path').'/'.$filename.'.'.$asset->mimetype->extension;
-		
+		$path = Kohana::config('admin/asset.upload_path').'/'.$asset->filename;
+
 		if ($asset->mimetype->subtype == 'image' AND $width AND $height)
 		{
-			$image = Image::factory($path, static::$driver);
+			try
+			{
+				$image = Image::factory($path, static::$driver);
+			}
+			catch(Kohana_Exception $e)
+			{
+				// Image does not exist on filesystem
+				return NULL;
+			}
 
 			if ($image->height > $height OR $image->width > $width)
 			{
