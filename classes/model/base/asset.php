@@ -11,7 +11,7 @@ class Model_Base_Asset extends Model_Base {
 	
 	protected $_has_many = array(
 		'sizes' => array('model' => 'asset_size', 'foreign_key' => 'asset_id'),
-    );
+	);
 
 	protected $_rules = array(
 		// Validate the $_FILES array
@@ -23,14 +23,25 @@ class Model_Base_Asset extends Model_Base {
 		'update' => array(
 			'filename' => array(
 				'trim' => NULL,
-				'max_length' => array('128'),
+				'max_length' => array(127),
+				'not_empty' => NULL,
 			),
+			'description' => array(
+				'trim' => NULL,
+				'max_length' => array(255),
+				'not_empty' => NULL,
+			)
 		)
 	);
 	
 	// Validation callbacks
 	protected $_callbacks = array(
-		'extension' => array('callback_mimetype_exists')
+		'upload' => array(
+			'extension' => array('callback_mimetype_exists'),
+		),
+		'update' => array(
+			'filename' => array('callback_filename_empty'),
+		),
 	);
 	
 	// Check mimetype exists by extension
@@ -47,6 +58,18 @@ class Model_Base_Asset extends Model_Base {
 		}		
 		
 		$array['mimetype_id'] = $mimetype->id;
+	}
+
+	// Check if filename is empty
+	public function callback_filename_empty(Validate $array, $field)
+	{
+		$val = $array[$field];
+
+		// Strip extension
+		if (preg_replace('/\.\w+$/', '', $val) === '')
+		{
+			$array->error($field, 'filename_empty', array($val));
+		}
 	}
 	
 	public function resize($path, $width = NULL, $height = NULL, $crop = NULL)
